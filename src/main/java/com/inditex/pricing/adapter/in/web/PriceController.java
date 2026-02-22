@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,8 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/prices")
 @Tag(name = "Precios", description = "Consulta del precio aplicable para un producto y marca en una fecha dada")
 public class PriceController {
+
+    private static final Logger log = LoggerFactory.getLogger(PriceController.class);
 
     private final FindApplicablePriceUseCase findApplicablePriceUseCase;
 
@@ -71,9 +75,12 @@ public class PriceController {
             @Parameter(description = "Identificador de la marca (1 = ZARA)", example = "1", required = true)
             @RequestParam Long brandId
     ) {
-        return findApplicablePriceUseCase.findApplicablePrice(applicationDate, productId, brandId)
+        log.info("GET /api/prices — productId={}, brandId={}, fecha={}", productId, brandId, applicationDate);
+        var response = findApplicablePriceUseCase.findApplicablePrice(applicationDate, productId, brandId)
                 .map(PriceResponse::fromDomain)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+        log.info("Respuesta: HTTP {}", response.getStatusCode().value());
+        return response;
     }
 }

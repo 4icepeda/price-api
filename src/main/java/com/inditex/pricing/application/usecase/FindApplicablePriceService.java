@@ -3,6 +3,8 @@ package com.inditex.pricing.application.usecase;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.domain.port.in.FindApplicablePriceUseCase;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -15,6 +17,8 @@ import java.util.Optional;
  */
 public class FindApplicablePriceService implements FindApplicablePriceUseCase {
 
+    private static final Logger log = LoggerFactory.getLogger(FindApplicablePriceService.class);
+
     private final PriceRepositoryPort priceRepositoryPort;
 
     public FindApplicablePriceService(PriceRepositoryPort priceRepositoryPort) {
@@ -23,8 +27,11 @@ public class FindApplicablePriceService implements FindApplicablePriceUseCase {
 
     @Override
     public Optional<Price> findApplicablePrice(LocalDateTime applicationDate, Long productId, Long brandId) {
-        return priceRepositoryPort.findApplicablePrices(applicationDate, productId, brandId)
+        log.debug("Buscando precio aplicable: productId={}, brandId={}, fecha={}", productId, brandId, applicationDate);
+        var result = priceRepositoryPort.findApplicablePrices(applicationDate, productId, brandId)
                 .stream()
                 .max(Comparator.comparingInt(Price::priority));
+        log.debug("Resultado: {}", result.map(p -> "priceList=" + p.priceList() + " priority=" + p.priority()).orElse("ninguno"));
+        return result;
     }
 }
