@@ -9,6 +9,7 @@ Servicio REST desarrollado con **Spring Boot 3.2.5** y **Java 17** que consulta 
 - Spring Data JPA
 - H2 (base de datos en memoria)
 - Flyway (migraciones de esquema y datos)
+- Springdoc OpenAPI 2.5.0 (Swagger UI)
 - JUnit 5 + Mockito (tests)
 - Maven
 
@@ -101,6 +102,18 @@ curl "http://localhost:8080/api/prices?applicationDate=2020-06-15T10:00:00&produ
 # Test 5: 16/06 a las 21:00 → tarifa 4, 38.95 EUR
 curl "http://localhost:8080/api/prices?applicationDate=2020-06-16T21:00:00&productId=35455&brandId=1"
 ```
+
+## Documentacion interactiva (Swagger UI)
+
+Con la aplicacion en marcha, la documentacion interactiva del API esta disponible en:
+
+| Interfaz | URL |
+|----------|-----|
+| **Swagger UI** | `http://localhost:8080/swagger-ui.html` |
+| **OpenAPI JSON** | `http://localhost:8080/v3/api-docs` |
+| **OpenAPI YAML** | `http://localhost:8080/v3/api-docs.yaml` |
+
+Swagger UI permite explorar el endpoint, ver los parametros, los esquemas de respuesta y ejecutar peticiones directamente desde el navegador sin necesidad de Postman ni curl.
 
 ## Ejecutar tests
 

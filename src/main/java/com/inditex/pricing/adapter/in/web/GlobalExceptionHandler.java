@@ -1,5 +1,6 @@
 package com.inditex.pricing.adapter.in.web;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -16,8 +17,13 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
-    }
+    @Schema(description = "Respuesta de error estandar de la API")
+    public record ErrorResponse(
+            @Schema(description = "Codigo de estado HTTP", example = "400") int status,
+            @Schema(description = "Descripcion del error", example = "Bad Request") String error,
+            @Schema(description = "Mensaje descriptivo del error", example = "Missing required parameter: applicationDate") String message,
+            @Schema(description = "Momento en que se produjo el error", example = "2020-06-14T16:00:00") LocalDateTime timestamp
+    ) {}
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingParameter(MissingServletRequestParameterException ex) {
