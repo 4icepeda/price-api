@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
  */
 @RestController
 @RequestMapping("/api/prices")
+@Validated
 @Tag(name = "Precios", description = "Consulta del precio aplicable para un producto y marca en una fecha dada")
 public class PriceController {
 
@@ -70,10 +73,10 @@ public class PriceController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime applicationDate,
 
             @Parameter(description = "Identificador del producto", example = "35455", required = true)
-            @RequestParam Long productId,
+            @RequestParam @Positive Long productId,
 
             @Parameter(description = "Identificador de la marca (1 = ZARA)", example = "1", required = true)
-            @RequestParam Long brandId
+            @RequestParam @Positive Long brandId
     ) {
         log.info("GET /api/prices — productId={}, brandId={}, fecha={}", productId, brandId, applicationDate);
         var response = findApplicablePriceUseCase.findApplicablePrice(applicationDate, productId, brandId)

@@ -1,6 +1,7 @@
 package com.inditex.pricing.adapter.in.web;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 /**
  * Centralized exception handler for REST controllers.
@@ -46,6 +48,24 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
                 "Invalid value for parameter '" + ex.getName() + "': " + ex.getValue(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(cv -> {
+                    String path = cv.getPropertyPath().toString();
+                    String paramName = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
+                    return "Invalid value for parameter '" + paramName + "': " + cv.getMessage();
+                })
+                .collect(Collectors.joining(", "));
+        var error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                message,
                 LocalDateTime.now()
         );
         return ResponseEntity.badRequest().body(error);

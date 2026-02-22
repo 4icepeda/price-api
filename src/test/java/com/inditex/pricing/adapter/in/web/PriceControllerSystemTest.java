@@ -167,4 +167,37 @@ class PriceControllerSystemTest {
                 .andExpect(jsonPath("$.endDate").value("2020-06-14T18:30:00"))
                 .andExpect(jsonPath("$.currency").value("EUR"));
     }
+
+    @Test
+    @DisplayName("Should return 400 when productId is zero")
+    void shouldReturn400WhenProductIdIsZero() throws Exception {
+        mockMvc.perform(get(API_URL)
+                        .param("applicationDate", "2020-06-14T10:00:00")
+                        .param("productId", "0")
+                        .param("brandId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should return 400 when productId is negative")
+    void shouldReturn400WhenProductIdIsNegative() throws Exception {
+        mockMvc.perform(get(API_URL)
+                        .param("applicationDate", "2020-06-14T10:00:00")
+                        .param("productId", "-1")
+                        .param("brandId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should return 400 when brandId is zero")
+    void shouldReturn400WhenBrandIdIsZero() throws Exception {
+        mockMvc.perform(get(API_URL)
+                        .param("applicationDate", "2020-06-14T10:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "0")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
 }
