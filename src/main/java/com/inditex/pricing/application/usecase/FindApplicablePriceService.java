@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Application service implementing the FindApplicablePrice use case.
@@ -28,10 +31,31 @@ public class FindApplicablePriceService implements FindApplicablePriceUseCase {
     @Override
     public Optional<Price> findApplicablePrice(LocalDateTime applicationDate, Long productId, Long brandId) {
         log.debug("Buscando precio aplicable: productId={}, brandId={}, fecha={}", productId, brandId, applicationDate);
-        var result = priceRepositoryPort.findApplicablePrices(applicationDate, productId, brandId)
+
+        Map<Integer, List<Price>> byPriority = priceRepositoryPort
+                .findApplicablePrices(applicationDate, productId, brandId)
                 .stream()
-                .max(Comparator.comparingInt(Price::priority));
-        log.debug("Resultado: {}", result.map(p -> "priceList=" + p.priceList() + " priority=" + p.priority()).orElse("ninguno"));
-        return result;
+                .collect(Collectors.groupingBy(Price::priority));
+
+        if (byPriority.isEmpty()) {
+            log.debug("Resultado: ninguno");
+            return Optional.empty();
+        }
+
+        int maxPriority = byPriority.keySet().stream().max(Comparator.naturalOrder()).orElseThrow();
+        List<Price> topPrices = byPriority.get(maxPriority);
+
+        if (topPrices.size() > 1) {
+            throw new IllegalStateException(
+                    "Integridad de datos violada: " + topPrices.size() +
+                    " precios activos con prioridad " + maxPriority +
+                    " para productId=" + productId + ", brandId=" + brandId +
+                    ", fecha=" + applicationDate
+            );
+        }
+
+        Price result = topPrices.get(0);
+        log.debug("Resultado: priceList={} priority={}", result.priceList(), result.priority());
+        return Optional.of(result);
     }
 }

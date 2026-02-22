@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -122,6 +123,30 @@ class FindApplicablePriceServiceTest {
         assertThat(result.get().priority()).isEqualTo(2);
         assertThat(result.get().priceList()).isEqualTo(3);
         assertThat(result.get().amount()).isEqualByComparingTo(new BigDecimal("20.00"));
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException when two prices share the same maximum priority")
+    void shouldThrowWhenTwoPricesShareTheSameMaxPriority() {
+        Price duplicate1 = new Price(1L, BRAND_ID,
+                LocalDateTime.of(2020, 6, 14, 0, 0, 0),
+                LocalDateTime.of(2020, 12, 31, 23, 59, 59),
+                1, PRODUCT_ID, 1, new BigDecimal("35.50"), "EUR");
+
+        Price duplicate2 = new Price(2L, BRAND_ID,
+                LocalDateTime.of(2020, 6, 14, 0, 0, 0),
+                LocalDateTime.of(2020, 12, 31, 23, 59, 59),
+                2, PRODUCT_ID, 1, new BigDecimal("25.45"), "EUR");
+
+        when(priceRepositoryPort.findApplicablePrices(APPLICATION_DATE, PRODUCT_ID, BRAND_ID))
+                .thenReturn(List.of(duplicate1, duplicate2));
+
+        assertThatThrownBy(() -> service.findApplicablePrice(APPLICATION_DATE, PRODUCT_ID, BRAND_ID))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Integridad de datos violada")
+                .hasMessageContaining("prioridad 1")
+                .hasMessageContaining("productId=" + PRODUCT_ID)
+                .hasMessageContaining("brandId=" + BRAND_ID);
     }
 
     @Test
