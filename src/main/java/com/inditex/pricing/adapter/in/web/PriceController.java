@@ -80,7 +80,7 @@ public class PriceController {
                 .map(PriceResponse::fromDomain)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-        log.info("Respuesta: HTTP {}", response.getStatusCode().value());
+        log.info("Respuesta: HTTP {} — productId={}, brandId={}", response.getStatusCode().value(), productId, brandId);
         return response;
     }
 }
