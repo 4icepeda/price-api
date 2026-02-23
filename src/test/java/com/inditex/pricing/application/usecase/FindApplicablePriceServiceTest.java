@@ -1,6 +1,7 @@
 package com.inditex.pricing.application.usecase;
 
 import com.inditex.pricing.application.port.out.PriceMetricsPort;
+import com.inditex.pricing.domain.exception.PriorityConflictException;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
@@ -130,7 +131,7 @@ class FindApplicablePriceServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw IllegalStateException when two prices share the same maximum priority")
+    @DisplayName("Should throw PriorityConflictException when two prices share the same maximum priority")
     void shouldThrowWhenTwoPricesShareTheSameMaxPriority() {
         Price duplicate1 = new Price(1L, BRAND_ID,
                 LocalDateTime.of(2020, 6, 14, 0, 0, 0),
@@ -146,7 +147,7 @@ class FindApplicablePriceServiceTest {
                 .thenReturn(List.of(duplicate1, duplicate2));
 
         assertThatThrownBy(() -> service.findApplicablePrice(APPLICATION_DATE, PRODUCT_ID, BRAND_ID))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(PriorityConflictException.class)
                 .hasMessageContaining("Integridad de datos violada")
                 .hasMessageContaining("prioridad 1")
                 .hasMessageContaining("productId=" + PRODUCT_ID)

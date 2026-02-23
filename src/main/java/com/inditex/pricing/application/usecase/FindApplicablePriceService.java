@@ -1,6 +1,7 @@
 package com.inditex.pricing.application.usecase;
 
 import com.inditex.pricing.application.port.out.PriceMetricsPort;
+import com.inditex.pricing.domain.exception.PriorityConflictException;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.domain.port.in.FindApplicablePriceUseCase;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
@@ -50,12 +51,7 @@ public class FindApplicablePriceService implements FindApplicablePriceUseCase {
 
         if (topPrices.size() > 1) {
             metricsPort.recordPriorityConflict(productId, brandId, topPrices.size());
-            throw new IllegalStateException(
-                    "Integridad de datos violada: " + topPrices.size() +
-                    " precios activos con prioridad " + maxPriority +
-                    " para productId=" + productId + ", brandId=" + brandId +
-                    ", fecha=" + applicationDate
-            );
+            throw new PriorityConflictException(productId, brandId, topPrices.size(), maxPriority);
         }
 
         Price result = topPrices.get(0);

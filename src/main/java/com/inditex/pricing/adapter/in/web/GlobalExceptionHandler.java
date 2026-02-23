@@ -1,5 +1,6 @@
 package com.inditex.pricing.adapter.in.web;
 
+import com.inditex.pricing.domain.exception.PriorityConflictException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -69,6 +70,18 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(PriorityConflictException.class)
+    public ResponseEntity<ErrorResponse> handlePriorityConflict(PriorityConflictException ex) {
+        log.error("Conflicto de prioridad detectado: {}", ex.getMessage());
+        var error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Data Integrity Error",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.internalServerError().body(error);
     }
 
     @ExceptionHandler(Exception.class)
