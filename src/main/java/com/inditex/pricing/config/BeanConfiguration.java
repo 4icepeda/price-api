@@ -9,7 +9,7 @@ import com.inditex.pricing.adapter.out.persistence.SpringDataPriceRepository;
 import com.inditex.pricing.application.port.out.PriceMetricsPort;
 import com.inditex.pricing.application.usecase.FindApplicablePriceService;
 import com.inditex.pricing.domain.port.in.FindApplicablePriceUseCase;
-import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
+import com.inditex.pricing.application.port.out.PriceRepositoryPort;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

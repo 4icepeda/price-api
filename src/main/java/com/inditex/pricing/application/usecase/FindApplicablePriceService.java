@@ -4,7 +4,7 @@ import com.inditex.pricing.application.port.out.PriceMetricsPort;
 import com.inditex.pricing.domain.exception.PriorityConflictException;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.domain.port.in.FindApplicablePriceUseCase;
-import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
+import com.inditex.pricing.application.port.out.PriceRepositoryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

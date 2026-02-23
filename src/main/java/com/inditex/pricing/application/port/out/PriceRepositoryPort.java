@@ -1,4 +1,4 @@
-package com.inditex.pricing.domain.port.out;
+package com.inditex.pricing.application.port.out;
 
 import com.inditex.pricing.domain.model.Price;
 
@@ -7,7 +7,9 @@ import java.util.List;
 
 /**
  * Output port for retrieving prices from the persistence layer.
- * The domain defines this interface; the persistence adapter implements it.
+ * Defined in the application layer because the application service
+ * (FindApplicablePriceService) is the sole consumer of this port.
+ * Implementations live in adapter/out/persistence/.
  */
 public interface PriceRepositoryPort {
 
