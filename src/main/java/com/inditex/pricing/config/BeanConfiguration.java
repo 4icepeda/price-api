@@ -1,6 +1,6 @@
 package com.inditex.pricing.config;
 
-import com.inditex.pricing.adapter.out.cache.CacheMetricsRecorder;
+import com.inditex.pricing.application.port.out.CacheMetricsRecorder;
 import com.inditex.pricing.adapter.out.cache.CachingPriceRepositoryAdapter;
 import com.inditex.pricing.adapter.out.cache.MicrometerCacheMetricsAdapter;
 import com.inditex.pricing.adapter.out.metrics.MicrometerPriceMetricsAdapter;

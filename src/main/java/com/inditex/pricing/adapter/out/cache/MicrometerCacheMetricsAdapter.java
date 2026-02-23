@@ -1,5 +1,6 @@
 package com.inditex.pricing.adapter.out.cache;
 
+import com.inditex.pricing.application.port.out.CacheMetricsRecorder;
 import io.micrometer.core.instrument.MeterRegistry;
 
 public class MicrometerCacheMetricsAdapter implements CacheMetricsRecorder {

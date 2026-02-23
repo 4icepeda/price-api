@@ -1,5 +1,6 @@
 package com.inditex.pricing.adapter.out.cache;
 
+import com.inditex.pricing.application.port.out.CacheMetricsRecorder;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.application.port.out.PriceRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;

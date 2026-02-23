@@ -2,6 +2,7 @@ package com.inditex.pricing.adapter.out.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.inditex.pricing.application.port.out.CacheMetricsRecorder;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.application.port.out.PriceRepositoryPort;
 
