@@ -9,8 +9,11 @@ import com.inditex.pricing.application.usecase.FindApplicablePriceService;
 import com.inditex.pricing.domain.port.in.FindApplicablePriceUseCase;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Duration;
 
 /**
  * Spring configuration that wires the hexagonal architecture together.
@@ -20,10 +23,17 @@ import org.springframework.context.annotation.Configuration;
 public class BeanConfiguration {
 
     @Bean
-    public PriceRepositoryPort priceRepositoryPort(SpringDataPriceRepository springDataPriceRepository,
-                                                   MeterRegistry meterRegistry) {
+    public PriceRepositoryPort priceRepositoryPort(
+            SpringDataPriceRepository springDataPriceRepository,
+            MeterRegistry meterRegistry,
+            @Value("${pricing.cache.prices.max-size:1000}") int cacheMaxSize,
+            @Value("${pricing.cache.prices.ttl-hours:1}") int cacheTtlHours) {
         PriceRepositoryPort persistence = new PricePersistenceAdapter(springDataPriceRepository);
-        return new CachingPriceRepositoryAdapter(persistence, new MicrometerCacheMetricsAdapter(meterRegistry));
+        return new CachingPriceRepositoryAdapter(
+                persistence,
+                new MicrometerCacheMetricsAdapter(meterRegistry),
+                cacheMaxSize,
+                Duration.ofHours(cacheTtlHours));
     }
 
     @Bean

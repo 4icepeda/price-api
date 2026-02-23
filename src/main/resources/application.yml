@@ -30,6 +30,12 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+pricing:
+  cache:
+    prices:
+      max-size: 1000
+      ttl-hours: 1
+
 server:
   port: 8080
 

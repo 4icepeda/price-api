@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,7 +41,7 @@ class CachingPriceRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        adapter = new CachingPriceRepositoryAdapter(delegate, cacheMetrics);
+        adapter = new CachingPriceRepositoryAdapter(delegate, cacheMetrics, 1000, Duration.ofHours(1));
     }
 
     @Test
