@@ -1,7 +1,7 @@
 package com.inditex.pricing.config;
 
 import com.inditex.pricing.adapter.out.cache.CachingPriceRepositoryAdapter;
-import com.inditex.pricing.adapter.out.metrics.MicrometerCacheMetricsAdapter;
+import com.inditex.pricing.adapter.out.cache.MicrometerCacheMetricsAdapter;
 import com.inditex.pricing.adapter.out.metrics.MicrometerPriceMetricsAdapter;
 import com.inditex.pricing.adapter.out.persistence.PricePersistenceAdapter;
 import com.inditex.pricing.adapter.out.persistence.SpringDataPriceRepository;

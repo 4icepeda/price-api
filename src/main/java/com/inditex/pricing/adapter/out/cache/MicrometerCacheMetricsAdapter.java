@@ -1,13 +1,7 @@
-package com.inditex.pricing.adapter.out.metrics;
+package com.inditex.pricing.adapter.out.cache;
 
-import com.inditex.pricing.application.port.out.CacheMetricsPort;
 import io.micrometer.core.instrument.MeterRegistry;
 
-/**
- * Micrometer implementation of CacheMetricsPort.
- * Uses the same tag format as CaffeineCacheMetrics (cache + result) for
- * compatibility with standard Grafana Caffeine dashboards.
- */
 public class MicrometerCacheMetricsAdapter implements CacheMetricsPort {
 
     private final MeterRegistry registry;
