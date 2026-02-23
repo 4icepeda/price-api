@@ -1,5 +1,6 @@
 package com.inditex.pricing.config;
 
+import com.inditex.pricing.adapter.out.cache.CachingPriceRepositoryAdapter;
 import com.inditex.pricing.adapter.out.persistence.PricePersistenceAdapter;
 import com.inditex.pricing.adapter.out.persistence.SpringDataPriceRepository;
 import com.inditex.pricing.application.usecase.FindApplicablePriceService;
@@ -17,7 +18,8 @@ public class BeanConfiguration {
 
     @Bean
     public PriceRepositoryPort priceRepositoryPort(SpringDataPriceRepository springDataPriceRepository) {
-        return new PricePersistenceAdapter(springDataPriceRepository);
+        PriceRepositoryPort persistence = new PricePersistenceAdapter(springDataPriceRepository);
+        return new CachingPriceRepositoryAdapter(persistence);
     }
 
     @Bean
