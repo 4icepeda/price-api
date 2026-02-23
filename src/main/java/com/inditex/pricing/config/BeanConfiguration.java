@@ -1,10 +1,12 @@
 package com.inditex.pricing.config;
 
+import com.inditex.pricing.adapter.out.cache.CacheMetricsRecorder;
 import com.inditex.pricing.adapter.out.cache.CachingPriceRepositoryAdapter;
 import com.inditex.pricing.adapter.out.cache.MicrometerCacheMetricsAdapter;
 import com.inditex.pricing.adapter.out.metrics.MicrometerPriceMetricsAdapter;
 import com.inditex.pricing.adapter.out.persistence.PricePersistenceAdapter;
 import com.inditex.pricing.adapter.out.persistence.SpringDataPriceRepository;
+import com.inditex.pricing.application.port.out.PriceMetricsPort;
 import com.inditex.pricing.application.usecase.FindApplicablePriceService;
 import com.inditex.pricing.domain.port.in.FindApplicablePriceUseCase;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
@@ -23,22 +25,32 @@ import java.time.Duration;
 public class BeanConfiguration {
 
     @Bean
+    public PriceMetricsPort priceMetricsPort(MeterRegistry meterRegistry) {
+        return new MicrometerPriceMetricsAdapter(meterRegistry);
+    }
+
+    @Bean
+    public CacheMetricsRecorder cacheMetricsRecorder(MeterRegistry meterRegistry) {
+        return new MicrometerCacheMetricsAdapter(meterRegistry);
+    }
+
+    @Bean
     public PriceRepositoryPort priceRepositoryPort(
             SpringDataPriceRepository springDataPriceRepository,
-            MeterRegistry meterRegistry,
+            CacheMetricsRecorder cacheMetricsRecorder,
             @Value("${pricing.cache.prices.max-size:1000}") int cacheMaxSize,
             @Value("${pricing.cache.prices.ttl-hours:1}") int cacheTtlHours) {
         PriceRepositoryPort persistence = new PricePersistenceAdapter(springDataPriceRepository);
         return new CachingPriceRepositoryAdapter(
                 persistence,
-                new MicrometerCacheMetricsAdapter(meterRegistry),
+                cacheMetricsRecorder,
                 cacheMaxSize,
                 Duration.ofHours(cacheTtlHours));
     }
 
     @Bean
     public FindApplicablePriceUseCase findApplicablePriceUseCase(PriceRepositoryPort priceRepositoryPort,
-                                                                  MeterRegistry meterRegistry) {
-        return new FindApplicablePriceService(priceRepositoryPort, new MicrometerPriceMetricsAdapter(meterRegistry));
+                                                                  PriceMetricsPort priceMetricsPort) {
+        return new FindApplicablePriceService(priceRepositoryPort, priceMetricsPort);
     }
 }
