@@ -113,4 +113,54 @@ class PricePersistenceAdapterIntegrationTest {
         assertThat(prices).hasSize(2);
         assertThat(prices).extracting(Price::priceList).containsExactlyInAnyOrder(1, 3);
     }
+
+    // ==========================================
+    // Boundary condition tests (startDate / endDate inclusive semantics)
+    // Tariff 2: startDate=2020-06-14T15:00:00, endDate=2020-06-14T18:30:00
+    // Query: startDate <= applicationDate AND endDate >= applicationDate
+    // ==========================================
+
+    @Test
+    @DisplayName("Should match tariff when applicationDate equals startDate exactly (inclusive lower bound)")
+    void shouldMatchWhenApplicationDateEqualsStartDate() {
+        LocalDateTime applicationDate = LocalDateTime.of(2020, 6, 14, 15, 0, 0);
+
+        List<Price> prices = adapter.findApplicablePrices(applicationDate, 35455L, 1L);
+
+        assertThat(prices).hasSize(2);
+        assertThat(prices).extracting(Price::priceList).containsExactlyInAnyOrder(1, 2);
+    }
+
+    @Test
+    @DisplayName("Should match tariff when applicationDate equals endDate exactly (inclusive upper bound)")
+    void shouldMatchWhenApplicationDateEqualsEndDate() {
+        LocalDateTime applicationDate = LocalDateTime.of(2020, 6, 14, 18, 30, 0);
+
+        List<Price> prices = adapter.findApplicablePrices(applicationDate, 35455L, 1L);
+
+        assertThat(prices).hasSize(2);
+        assertThat(prices).extracting(Price::priceList).containsExactlyInAnyOrder(1, 2);
+    }
+
+    @Test
+    @DisplayName("Should not match tariff when applicationDate is one second before startDate")
+    void shouldNotMatchWhenApplicationDateIsOneSecondBeforeStartDate() {
+        LocalDateTime applicationDate = LocalDateTime.of(2020, 6, 14, 14, 59, 59);
+
+        List<Price> prices = adapter.findApplicablePrices(applicationDate, 35455L, 1L);
+
+        assertThat(prices).hasSize(1);
+        assertThat(prices.get(0).priceList()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Should not match tariff when applicationDate is one second after endDate")
+    void shouldNotMatchWhenApplicationDateIsOneSecondAfterEndDate() {
+        LocalDateTime applicationDate = LocalDateTime.of(2020, 6, 14, 18, 30, 1);
+
+        List<Price> prices = adapter.findApplicablePrices(applicationDate, 35455L, 1L);
+
+        assertThat(prices).hasSize(1);
+        assertThat(prices.get(0).priceList()).isEqualTo(1);
+    }
 }

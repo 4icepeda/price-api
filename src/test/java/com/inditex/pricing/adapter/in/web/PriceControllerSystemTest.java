@@ -200,4 +200,63 @@ class PriceControllerSystemTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
+
+    // ==========================================
+    // Boundary condition tests (startDate / endDate inclusive semantics)
+    // Tariff 2: startDate=2020-06-14T15:00:00, endDate=2020-06-14T18:30:00, priority=1
+    // At boundaries: tariff 2 wins (priority 1 > priority 0 of tariff 1)
+    // One second outside: tariff 1 is the only match (priority 0, price 35.50)
+    // ==========================================
+
+    @Test
+    @DisplayName("Should return tariff 2 when applicationDate equals startDate exactly (inclusive lower bound)")
+    void shouldReturnHighPriorityPriceWhenApplicationDateIsExactlyAtStartDate() throws Exception {
+        mockMvc.perform(get(API_URL)
+                        .param("applicationDate", "2020-06-14T15:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.priceList").value(2))
+                .andExpect(jsonPath("$.price").value(25.45));
+    }
+
+    @Test
+    @DisplayName("Should return tariff 2 when applicationDate equals endDate exactly (inclusive upper bound)")
+    void shouldReturnHighPriorityPriceWhenApplicationDateIsExactlyAtEndDate() throws Exception {
+        mockMvc.perform(get(API_URL)
+                        .param("applicationDate", "2020-06-14T18:30:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.priceList").value(2))
+                .andExpect(jsonPath("$.price").value(25.45));
+    }
+
+    @Test
+    @DisplayName("Should return base tariff 1 when applicationDate is one second before tariff 2 startDate")
+    void shouldReturnBasePriceWhenApplicationDateIsOneSecondBeforeStartDate() throws Exception {
+        mockMvc.perform(get(API_URL)
+                        .param("applicationDate", "2020-06-14T14:59:59")
+                        .param("productId", "35455")
+                        .param("brandId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.priceList").value(1))
+                .andExpect(jsonPath("$.price").value(35.50));
+    }
+
+    @Test
+    @DisplayName("Should return base tariff 1 when applicationDate is one second after tariff 2 endDate")
+    void shouldReturnBasePriceWhenApplicationDateIsOneSecondAfterEndDate() throws Exception {
+        mockMvc.perform(get(API_URL)
+                        .param("applicationDate", "2020-06-14T18:30:01")
+                        .param("productId", "35455")
+                        .param("brandId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.priceList").value(1))
+                .andExpect(jsonPath("$.price").value(35.50));
+    }
 }
