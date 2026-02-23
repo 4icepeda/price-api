@@ -1,5 +1,6 @@
 package com.inditex.pricing.adapter.out.cache;
 
+import com.inditex.pricing.application.port.out.CacheMetricsPort;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,9 @@ class CachingPriceRepositoryAdapterTest {
     @Mock
     private PriceRepositoryPort delegate;
 
+    @Mock
+    private CacheMetricsPort cacheMetrics;
+
     private CachingPriceRepositoryAdapter adapter;
 
     private static final LocalDateTime DATE = LocalDateTime.of(2020, 6, 14, 16, 0, 0);
@@ -37,7 +41,7 @@ class CachingPriceRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        adapter = new CachingPriceRepositoryAdapter(delegate);
+        adapter = new CachingPriceRepositoryAdapter(delegate, cacheMetrics);
     }
 
     @Test
@@ -49,6 +53,7 @@ class CachingPriceRepositoryAdapterTest {
 
         assertThat(result).containsExactly(PRICE);
         verify(delegate, times(1)).findApplicablePrices(DATE, PRODUCT_ID, BRAND_ID);
+        verify(cacheMetrics).recordMiss("prices.repository");
     }
 
     @Test
@@ -61,6 +66,7 @@ class CachingPriceRepositoryAdapterTest {
 
         assertThat(secondResult).containsExactly(PRICE);
         verify(delegate, times(1)).findApplicablePrices(DATE, PRODUCT_ID, BRAND_ID);
+        verify(cacheMetrics).recordHit("prices.repository");
     }
 
     @Test

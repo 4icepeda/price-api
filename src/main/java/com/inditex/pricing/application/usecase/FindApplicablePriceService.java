@@ -1,5 +1,6 @@
 package com.inditex.pricing.application.usecase;
 
+import com.inditex.pricing.application.port.out.PriceMetricsPort;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.domain.port.in.FindApplicablePriceUseCase;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
@@ -23,9 +24,11 @@ public class FindApplicablePriceService implements FindApplicablePriceUseCase {
     private static final Logger log = LoggerFactory.getLogger(FindApplicablePriceService.class);
 
     private final PriceRepositoryPort priceRepositoryPort;
+    private final PriceMetricsPort metricsPort;
 
-    public FindApplicablePriceService(PriceRepositoryPort priceRepositoryPort) {
+    public FindApplicablePriceService(PriceRepositoryPort priceRepositoryPort, PriceMetricsPort metricsPort) {
         this.priceRepositoryPort = priceRepositoryPort;
+        this.metricsPort = metricsPort;
     }
 
     @Override
@@ -46,6 +49,7 @@ public class FindApplicablePriceService implements FindApplicablePriceUseCase {
         List<Price> topPrices = byPriority.get(maxPriority);
 
         if (topPrices.size() > 1) {
+            metricsPort.recordPriorityConflict(productId, brandId, topPrices.size());
             throw new IllegalStateException(
                     "Integridad de datos violada: " + topPrices.size() +
                     " precios activos con prioridad " + maxPriority +

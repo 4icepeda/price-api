@@ -1,5 +1,6 @@
 package com.inditex.pricing.application.usecase;
 
+import com.inditex.pricing.application.port.out.PriceMetricsPort;
 import com.inditex.pricing.domain.model.Price;
 import com.inditex.pricing.domain.port.out.PriceRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ class FindApplicablePriceServiceTest {
     @Mock
     private PriceRepositoryPort priceRepositoryPort;
 
+    @Mock
+    private PriceMetricsPort metricsPort;
+
     private FindApplicablePriceService service;
 
     private static final LocalDateTime APPLICATION_DATE = LocalDateTime.of(2020, 6, 14, 16, 0, 0);
@@ -39,7 +43,7 @@ class FindApplicablePriceServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new FindApplicablePriceService(priceRepositoryPort);
+        service = new FindApplicablePriceService(priceRepositoryPort, metricsPort);
     }
 
     @Test
@@ -147,6 +151,8 @@ class FindApplicablePriceServiceTest {
                 .hasMessageContaining("prioridad 1")
                 .hasMessageContaining("productId=" + PRODUCT_ID)
                 .hasMessageContaining("brandId=" + BRAND_ID);
+
+        verify(metricsPort).recordPriorityConflict(PRODUCT_ID, BRAND_ID, 2);
     }
 
     @Test
