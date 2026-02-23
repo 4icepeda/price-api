@@ -33,15 +33,17 @@ public class CachingPriceRepositoryAdapter implements PriceRepositoryPort {
     @Override
     public List<Price> findApplicablePrices(LocalDateTime applicationDate, Long productId, Long brandId) {
         CacheKey key = new CacheKey(applicationDate, productId, brandId);
-        List<Price> cached = cache.getIfPresent(key);
-        if (cached != null) {
+        boolean[] wasMiss = {false};
+        List<Price> result = cache.get(key, k -> {
+            wasMiss[0] = true;
+            return delegate.findApplicablePrices(applicationDate, productId, brandId);
+        });
+        if (wasMiss[0]) {
+            cacheMetrics.recordMiss(CACHE_NAME);
+        } else {
             cacheMetrics.recordHit(CACHE_NAME);
-            return cached;
         }
-        cacheMetrics.recordMiss(CACHE_NAME);
-        List<Price> prices = delegate.findApplicablePrices(applicationDate, productId, brandId);
-        cache.put(key, prices);
-        return prices;
+        return result;
     }
 
     private record CacheKey(LocalDateTime applicationDate, Long productId, Long brandId) {}
