@@ -2,7 +2,7 @@ package com.inditex.pricing.adapter.out.cache;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
-public class MicrometerCacheMetricsAdapter implements CacheMetricsPort {
+public class MicrometerCacheMetricsAdapter implements CacheMetricsRecorder {
 
     private final MeterRegistry registry;
 

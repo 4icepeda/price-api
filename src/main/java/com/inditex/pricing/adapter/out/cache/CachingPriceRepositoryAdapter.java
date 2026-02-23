@@ -25,10 +25,10 @@ public class CachingPriceRepositoryAdapter implements PriceRepositoryPort {
     private static final String CACHE_NAME = "prices.repository";
 
     private final PriceRepositoryPort delegate;
-    private final CacheMetricsPort cacheMetrics;
+    private final CacheMetricsRecorder cacheMetrics;
     private final Cache<CacheKey, List<Price>> cache;
 
-    public CachingPriceRepositoryAdapter(PriceRepositoryPort delegate, CacheMetricsPort cacheMetrics) {
+    public CachingPriceRepositoryAdapter(PriceRepositoryPort delegate, CacheMetricsRecorder cacheMetrics) {
         this.delegate = delegate;
         this.cacheMetrics = cacheMetrics;
         this.cache = Caffeine.newBuilder()

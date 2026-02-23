@@ -23,7 +23,7 @@ class CachingPriceRepositoryAdapterTest {
     private PriceRepositoryPort delegate;
 
     @Mock
-    private CacheMetricsPort cacheMetrics;
+    private CacheMetricsRecorder cacheMetrics;
 
     private CachingPriceRepositoryAdapter adapter;
 
