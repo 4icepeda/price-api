@@ -51,7 +51,7 @@ public class PriceEntity {
         // Required by JPA
     }
 
-    public PriceEntity(Long brandId, LocalDateTime startDate, LocalDateTime endDate,
+    PriceEntity(Long brandId, LocalDateTime startDate, LocalDateTime endDate,
                        Integer priceList, Long productId, Integer priority,
                        BigDecimal price, String currency) {
         this.brandId = brandId;
