@@ -9,6 +9,8 @@ Servicio REST desarrollado con **Spring Boot 3.2.5** y **Java 17** que consulta 
 - Spring Data JPA
 - H2 (base de datos en memoria)
 - Flyway (migraciones de esquema y datos)
+- Caffeine (cache en memoria con TTL configurable)
+- Micrometer + Prometheus (metricas de negocio y cache)
 - Springdoc OpenAPI 2.5.0 (Swagger UI)
 - JUnit 5 + Mockito (tests)
 - Maven
@@ -19,15 +21,20 @@ Servicio REST desarrollado con **Spring Boot 3.2.5** y **Java 17** que consulta 
 src/main/java/com/inditex/pricing/
 ├── domain/
 │   ├── model/           # Objetos de dominio puros (records)
+│   ├── exception/       # Excepciones de dominio
 │   └── port/
-│       ├── in/          # Puertos de entrada (interfaces de casos de uso)
-│       └── out/         # Puertos de salida (interfaces de repositorio)
+│       └── in/          # Puertos de entrada (interfaces de casos de uso)
 ├── application/
-│   └── usecase/         # Implementacion de casos de uso
+│   ├── usecase/         # Implementacion de casos de uso (POJOs, sin @Service)
+│   └── port/
+│       └── out/         # Puertos de salida: PriceRepositoryPort, PriceMetricsPort, CacheMetricsRecorder
 ├── adapter/
-│   ├── in/web/          # Controladores REST, DTOs de respuesta
-│   └── out/persistence/ # Entidades JPA, repositorios Spring Data
-└── config/              # Configuracion de beans y wiring
+│   ├── in/web/          # Controladores REST, DTOs de respuesta, @ControllerAdvice
+│   └── out/
+│       ├── persistence/ # Entidades JPA, repositorios Spring Data
+│       ├── cache/       # Decorador Caffeine con TTL configurable
+│       └── metrics/     # Adaptador Micrometer/Prometheus
+└── config/              # Unico punto de wiring: instancia y conecta puertos e implementaciones
 ```
 
 **Reglas de dependencia:**
@@ -103,6 +110,47 @@ curl "http://localhost:8080/api/prices?applicationDate=2020-06-15T10:00:00&produ
 curl "http://localhost:8080/api/prices?applicationDate=2020-06-16T21:00:00&productId=35455&brandId=1"
 ```
 
+## Observabilidad y metricas
+
+Con la aplicacion en marcha, Spring Boot Actuator expone los siguientes endpoints:
+
+| Endpoint | Descripcion |
+|----------|-------------|
+| `GET /actuator/health` | Estado de la aplicacion (UP / DOWN) |
+| `GET /actuator/metrics` | Listado de todas las metricas registradas |
+| `GET /actuator/metrics/{nombre}` | Valor de una metrica concreta |
+| `GET /actuator/prometheus` | Metricas en formato Prometheus (scrape endpoint) |
+
+### Metricas de negocio y cache
+
+| Metrica | Tipo | Tags | Descripcion |
+|---------|------|------|-------------|
+| `prices.priority_conflicts` | Counter | `productId`, `brandId`, `count` | Conflictos de prioridad detectados (invariante de datos violada) |
+| `cache.gets` | Counter | `cache=prices.repository`, `result=hit\|miss` | Aciertos y fallos del cache de precios |
+
+Ejemplos de consulta directa:
+
+```bash
+# Estado general
+curl http://localhost:8080/actuator/health
+
+# Hits y misses del cache
+curl "http://localhost:8080/actuator/metrics/cache.gets"
+
+# Scrape completo para Prometheus
+curl http://localhost:8080/actuator/prometheus
+```
+
+La configuracion de cache es ajustable en `application.yml`:
+
+```yaml
+pricing:
+  cache:
+    prices:
+      max-size: 1000   # entradas maximas
+      ttl-hours: 1     # tiempo de vida (horas)
+```
+
 ## Documentacion interactiva (Swagger UI)
 
 Con la aplicacion en marcha, la documentacion interactiva del API esta disponible en:
@@ -121,13 +169,14 @@ Swagger UI permite explorar el endpoint, ver los parametros, los esquemas de res
 ./mvnw test
 ```
 
-### Cobertura de tests (22 tests)
+### Cobertura de tests (38 tests)
 
-| Tipo                | Clase                                      | Descripcion                                          |
-|---------------------|--------------------------------------------|------------------------------------------------------|
-| Unitarios           | `FindApplicablePriceServiceTest`           | Logica de negocio y desambiguacion por prioridad     |
-| Integracion         | `PricePersistenceAdapterIntegrationTest`   | Consultas JPA, mapeo entidad-dominio                 |
-| Sistema (end-to-end)| `PriceControllerSystemTest`                | 5 escenarios requeridos + casos de error (400, 404)  |
+| Tipo                | Clase                                      | Tests | Descripcion                                                       |
+|---------------------|--------------------------------------------|-------|-------------------------------------------------------------------|
+| Unitarios           | `FindApplicablePriceServiceTest`           | 6     | Logica de negocio: prioridad, conflictos, delegacion              |
+| Unitarios           | `CachingPriceRepositoryAdapterTest`        | 4     | Cache hit/miss, claves distintas, resultado vacio                 |
+| Integracion         | `PricePersistenceAdapterIntegrationTest`   | 11    | Consultas JPA, mapeo entidad-dominio, frontera startDate/endDate  |
+| Sistema (end-to-end)| `PriceControllerSystemTest`                | 17    | 5 escenarios requeridos, errores 400/404, frontera de fechas      |
 
 ## Base de datos
 
