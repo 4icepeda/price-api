@@ -1,4 +1,4 @@
-# Price API - Prueba Tecnica Inditex
+# Price API
 
 Servicio REST desarrollado con **Spring Boot 3.2.5** y **Java 17** que consulta el precio aplicable de un producto para una marca en una fecha determinada, aplicando desambiguacion por prioridad cuando existen tarifas solapadas.
 
@@ -194,7 +194,3 @@ Se usa H2 en memoria con Flyway para inicializacion. La consola H2 esta disponib
 | 1        | 2020-06-14 15:00:00 | 2020-06-14 18:30:00 | 2          | 35455      | 1        | 25.45 | EUR  |
 | 1        | 2020-06-15 00:00:00 | 2020-06-15 11:00:00 | 3          | 35455      | 1        | 30.50 | EUR  |
 | 1        | 2020-06-15 16:00:00 | 2020-12-31 23:59:59 | 4          | 35455      | 1        | 38.95 | EUR  |
-
-## Postman
-
-Se incluye el archivo `Inditex_Price_API.postman_collection.json` listo para importar en Postman con los 5 escenarios de prueba y casos de error, cada uno con scripts de validacion automatica.
